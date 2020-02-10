@@ -1,9 +1,26 @@
 require("dotenv").config();
-
 const express = require("express");
 const path = require("path");
+const { ApolloServer } = require("apollo-server-express");
 
+// db set up
+const knex = require("knex");
+const config = require("../knexfile");
+const db = knex(config);
+
+// express setup
 const app = express();
+
+// Apollo server setup
+const typeDefs = require("./gql/typeDefs.js");
+const resolvers = require("./gql/resolvers.js")(db);
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  introspection: true,
+  playground: true
+});
+server.applyMiddleware({ app, path: "/api" });
 
 app.get(/(.*)/, (req, res) => {
   const uri = req.params[0] === "/" ? "/index.html" : req.params[0];
@@ -17,6 +34,9 @@ app.get(/(.*)/, (req, res) => {
 });
 app.listen({ port: process.env.PORT }, () => {
   console.log(`🎲 Happy gaming! http://localhost:${process.env.PORT}`);
+  console.log(
+    `🎲 GraphQL playground! http://localhost:${process.env.PORT}/api`
+  );
 });
 
 function getPublicPath(fileName) {
