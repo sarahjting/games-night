@@ -1,0 +1,35 @@
+{
+  "name": "games-night",
+  "version": "0.0.0",
+  "main": "server/index.js",
+  "license": "MIT",
+  "scripts": {
+    "hack": "vue-cli-service build --watch ./src/index.js",
+    "build": "vue-cli-service build ./src/index.js",
+    "test:vue": "vue-cli-service test:unit ./src/tests/*",
+    "serve": "nodemon ./server/index.js",
+    "start": "yarn build && node ./server/index.js",
+    "test:server": "mocha ./server/tests/*",
+    "migrate": "knex migrate:latest --knexfile knexfile.js",
+    "rollback": "knex migrate:rollback --knexfile knexfile.js",
+    "seed": "knex seed:run --knexfile knexfile.js"
+  },
+  "dependencies": {
+    "@vue/cli": "^4.2.2",
+    "@vue/cli-service": "^4.2.2",
+    "apollo-server": "^2.10.0",
+    "apollo-server-express": "^2.10.0",
+    "axios": "^0.19.2",
+    "chai": "^4.2.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "graphql": "^14.6.0",
+    "knex": "^0.20.9",
+    "mocha": "^7.0.1",
+    "nodemon": "^2.0.2",
+    "pg": "^7.18.1",
+    "vue": "^2.6.11",
+    "vuetify": "^2.2.11",
+    "vuex": "^3.1.2"
+  }
+}
