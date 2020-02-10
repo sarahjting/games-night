@@ -1,4 +1,4 @@
-const games = require("../json/games");
+const games = require("../json/games").slice(0, 100);
 const currentDate = new Date();
 const dayLong = 7 * 24 * 60 * 60 * 1000;
 exports.seed = function(knex) {
@@ -20,22 +20,6 @@ exports.seed = function(knex) {
     });
   }
 
-  // create attendees
-  const eventAttendees = {};
-  for (const i in events) {
-    eventAttendees[i] = [];
-    const attendees = shuffle(players.keys()).slice(
-      0,
-      Math.ceil(Math.random() * players.length)
-    );
-    for (const j of attendees) {
-      eventAttendees[i].push({
-        player_id: j + 1,
-        event_id: Number(i) + 1
-      });
-    }
-  }
-
   // create rounds
   const eventRounds = [];
   const eventRoundPlayers = [];
@@ -49,13 +33,14 @@ exports.seed = function(knex) {
           Number(events[i].created_at) + Math.random() * 1000 * 60 * 60 * 5
         )
       });
-      const players = shuffle(eventAttendees[i])
-        .slice(0, Math.ceil(Math.random() * eventAttendees[i].length))
-        .map(x => x.player_id);
-      for (const x of players) {
+      const roundPlayers = shuffle(players.keys()).slice(
+        0,
+        Math.ceil(Math.random() * players.length)
+      );
+      for (const x of roundPlayers) {
         eventRoundPlayers.push({
-          player_id: x,
-          round_id: j + 1,
+          player_id: x + 1,
+          round_id: eventRounds.length,
           score: Math.floor(Math.random() * 100)
         });
       }
@@ -91,11 +76,11 @@ function randomKey(array) {
 
 function shuffle(array) {
   const newArray = [...array];
-  for (var i = array.length - 1; i > 0; i--) {
+  for (var i = newArray.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
-    var temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
+    var temp = newArray[i];
+    newArray[i] = newArray[j];
+    newArray[j] = temp;
   }
   return newArray;
 }

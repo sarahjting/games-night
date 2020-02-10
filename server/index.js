@@ -12,8 +12,9 @@ const db = knex(config);
 const app = express();
 
 // Apollo server setup
+const models = require("./gql/models")(db);
 const typeDefs = require("./gql/typeDefs.js");
-const resolvers = require("./gql/resolvers.js")(db);
+const resolvers = require("./gql/resolvers.js")(models, db);
 const server = new ApolloServer({
   typeDefs,
   resolvers,

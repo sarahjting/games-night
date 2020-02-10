@@ -1,57 +1,37 @@
-module.exports = db => ({
+module.exports = (models, db) => ({
   Event: {
-    rounds: event => db("rounds").where("rounds.event_id", event.id),
-    players: event =>
-      db("players")
-        .join("round_players", "players.id", "=", "round_players.player_id")
-        .join("rounds", "round_players.round_id", "=", "rounds.id")
-        .where("rounds.event_id", event.id)
+    rounds: event => models.rounds.get({ eventId: event.id }),
+    players: event => models.players.getByEvent(event.id)
   },
   Round: {
-    players: round => db("round_players").where("round_id", round.id),
-    game: round =>
-      db("games")
-        .where("id", round.game_id)
-        .first()
+    event: round => models.events.first({ id: round.event_id }),
+    players: round => models.roundPlayers.get({ roundId: round.id }),
+    game: round => models.games.first({ id: round.game_id })
   },
   RoundPlayer: {
-    player: roundPlayer =>
-      db("players")
-        .where("id", roundPlayer.player_id)
-        .first(),
-    round: roundPlayer =>
-      db("rounds")
-        .where("id", roundPlayer.round_id)
-        .first()
+    player: roundPlayer => models.players.first({ id: roundPlayer.player_id }),
+    round: roundPlayer => models.rounds.first({ id: roundPlayer.round_id })
   },
   Game: {
-    rounds: game => db("rounds").where("rounds.game_id", game.id)
+    rounds: game => models.rounds.get({ gameId: game.id })
   },
   Player: {
-    rounds: (player, args) => {
-      const query = db("rounds")
-        .join("round_players", "rounds.id", "=", "round_players.round_id")
-        .where("round_players.player_id", player.id)
-        .orderBy("rounds.id", "DESC");
-      if (args.gameId) query.where("game_id", args.gameId);
-      return query;
-    }
+    rounds: (player, args = {}) =>
+      models.roundPlayers.get(
+        { ...args, playerId: player.id },
+        { "rounds.id": "DESC" },
+        [["rounds", "rounds.id", "round_players.round_id"]]
+      )
   },
   Query: {
-    players: (context, args) => {
-      const query = db("players").orderBy("name", "ASC");
-      if (args.where && Object.keys(args.where).length) query.where(args.where);
-      return query;
-    },
-    events: (context, args) => {
-      const query = db("events").orderBy("id", "DESC");
-      if (args.where && Object.keys(args.where).length) query.where(args.where);
-      return query;
-    },
-    games: (context, args) => {
-      const query = db("games").orderBy("name", "ASC");
-      if (args.where && Object.keys(args.where).length) query.where(args.where);
-      return query;
-    }
+    players: (context, args) => models.players.get(args.where, { name: "ASC" }),
+    events: (context, args) => models.events.get(args.where, { id: "DESC" }),
+    games: (context, args) => models.games.get(args.where, { name: "ASC" })
+  },
+  Mutation: {
+    createPlayer: (context, args) => models.players.createAndGet(args.input),
+    createGame: (context, args) => models.games.createAndGet(args.input),
+    createEvent: (context, args) => models.events.createAndGet(args.input),
+    createRound: (context, args) => models.rounds.createAndGet(args.input)
   }
 });

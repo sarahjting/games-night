@@ -35,15 +35,36 @@ module.exports = gql`
   input GameWhereInput {
     name: String
   }
+  input GameCreateInput {
+    name: String!
+  }
   input PlayerWhereInput {
     name: String
   }
+  input PlayerCreateInput {
+    name: String!
+  }
   input EventWhereInput {
     id: Int
+  }
+  input EventCreateInput {
+    name: String!
+  }
+  input RoundCreateInput {
+    eventId: Int
+    game: String
+    players: [String]
+    playerScores: [Int]
   }
   type Query {
     players(where: PlayerWhereInput): [Player]
     events(where: EventWhereInput): [Event]
     games(where: GameWhereInput): [Game]
+  }
+  type Mutation {
+    createPlayer(input: PlayerCreateInput!): Player
+    createGame(input: GameCreateInput!): Game
+    createEvent(input: EventCreateInput!): Event
+    createRound(input: RoundCreateInput!): Round
   }
 `;
