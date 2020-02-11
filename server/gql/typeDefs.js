@@ -3,7 +3,8 @@ module.exports = gql`
   type Player {
     id: Int
     name: String
-    rounds(gameId: Int): [RoundPlayer]
+    score: Int
+    rounds(gameId: Int): [Round]
   }
   type Game {
     id: Int
@@ -16,20 +17,17 @@ module.exports = gql`
     name: String
     createdAt: String
     rounds: [Round]
+    games: [Game]
     players: [Player]
   }
   type Round {
     id: Int
     event: Event
-    players: [RoundPlayer]
+    players: [Player]
     gameId: Int
     game: Game
     createdAt: String
     winner: Player
-  }
-  type RoundPlayer {
-    round: Round
-    player: Player
     score: Int
   }
   input GameWhereInput {

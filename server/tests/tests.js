@@ -146,9 +146,7 @@ describe("GraphQL", () => {
     it("should create a game", async () => {
       const res1 = await query(
         "mutation($input:GameCreateInput!){createGame(input:$input){name}}",
-        {
-          input: { name: "New Game" }
-        }
+        { input: { name: "New Game" } }
       );
       const res2 = await query(
         "query($where:GameWhereInput){games(where:$where){name}}",

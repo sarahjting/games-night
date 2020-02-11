@@ -1,27 +1,23 @@
 module.exports = (models, db) => ({
   Event: {
     rounds: event => models.rounds.get({ eventId: event.id }),
-    players: event => models.players.getByEvent(event.id)
+    players: event => models.players.getByEvent(event.id),
+    games: event => models.games.getByEvent(event.id)
   },
   Round: {
-    event: round => models.events.first({ id: round.event_id }),
-    players: round => models.roundPlayers.get({ roundId: round.id }),
-    game: round => models.games.first({ id: round.game_id })
+    event: round => models.events.first({ id: round.eventId }),
+    players: round => models.players.getByRound(round.id),
+    game: round => models.games.first({ id: round.gameId })
   },
-  RoundPlayer: {
-    player: roundPlayer => models.players.first({ id: roundPlayer.player_id }),
-    round: roundPlayer => models.rounds.first({ id: roundPlayer.round_id })
-  },
+  // RoundPlayer: {
+  //   player: roundPlayer => models.players.first({ id: roundPlayer.playerId }),
+  //   round: roundPlayer => models.rounds.first({ id: roundPlayer.roundId })
+  // },
   Game: {
     rounds: game => models.rounds.get({ gameId: game.id })
   },
   Player: {
-    rounds: (player, args = {}) =>
-      models.roundPlayers.get(
-        { ...args, playerId: player.id },
-        { "rounds.id": "DESC" },
-        [["rounds", "rounds.id", "round_players.round_id"]]
-      )
+    rounds: player => models.rounds.getByPlayer(player.id)
   },
   Query: {
     players: (context, args) => models.players.get(args.where, { name: "ASC" }),

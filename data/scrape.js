@@ -1,32 +1,27 @@
 const http = require("http");
 const fs = require("fs");
-const games = require("./json/games.json");
+const images = require("./json/images.json");
 
 let count = 0;
-for (i in games) {
-  const imageUrl = games[i].imageUrl
-    ? games[i].imageUrl.replace("https", "http")
-    : "http://cf.geekdo-images.com/micro/img/QZDNfKAPYlXkZg265NxdjgShBXY=/fit-in/64x64/pic1657689.jpg";
-  const file = fs.createWriteStream(`./dist/img/${Number(i) + 1}.jpg`);
-  http.get(imageUrl, function(response) {
+for (i of images) {
+  const file = fs.createWriteStream(
+    `./public/img/games/${Number(i.id) + 1}.jpg`
+  );
+  http.get(i.imageUrl.replace("https", "http"), function(response, err) {
     response.pipe(file);
     console.log(`${count++} images saved`);
   });
 }
 
-// const games = [];
+// const imageUrls = [];
 // try {
-//     for (let i = 1; i <= 100; i++) {
-//         const data = await fetch(`https://boardgamegeek.com/browse/boardgame/page/${i}`);
-//         const parsedData = await data.text();
-//         for(let j = 1; j <= 100; j++) {
-//             const name = jQuery(`#results_objectname${j} a`, parsedData).text();
-//             const url = jQuery(`#results_objectname${j} a`, parsedData).attr('href');
-//             const imageUrl = jQuery('img', jQuery(`.collection_thumbnail`, parsedData)[j-1]).attr('src');
-//             games.push({name, url, imageUrl});
-//         }
-//         console.log(`page ${i} loaded`);
-//     }
-// } catch(e) {
-//     console.log("ERROR", e);
+//   for (let i = 1; i <= 1000; i++) {
+//     const data = await fetch(`https://boardgamegeek.com${games[i].url}`);
+//     const parsedData = await data.text();
+//     const imageUrl = jQuery(`.game-header-image img`, parsedData).attr("src");
+//     imageUrls.push({ id: i, imageUrl });
+//     console.log(`image ${i} loaded`);
+//   }
+// } catch (e) {
+//   console.log("ERROR", e);
 // }

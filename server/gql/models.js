@@ -1,5 +1,5 @@
 buildModel = (db, tableName) => ({
-  get: function(where = {}, orderBy = {}, joins = []) {
+  get: async function(where = {}, orderBy = {}, joins = []) {
     const query = db(tableName);
     for (const i of Object.keys(where)) {
       query.where(camelToSnake(i), where[i]);
@@ -11,7 +11,14 @@ buildModel = (db, tableName) => ({
       query.join(i[0], i[1], "=", i[2]);
     }
 
-    return query;
+    const raw = await query;
+    const r1 = [];
+    for (const i of raw) {
+      const r2 = {};
+      for (const j in i) r2[snakeToCamel(j)] = i[j];
+      r1.push(r2);
+    }
+    return r1;
   },
   first: async function(where, orderBy) {
     return (await this.get(where, orderBy)).pop();
@@ -38,19 +45,44 @@ function camelToSnake(string) {
     })
     .toLowerCase();
 }
+function snakeToCamel(string) {
+  return string.replace(/(_\w)/g, function(m) {
+    return m[1].toUpperCase();
+  });
+}
 
 module.exports = db => {
   const models = {
     players: buildModel(db, "players"),
-    roundPlayers: buildModel(db, "round_players"),
     events: buildModel(db, "events"),
     games: buildModel(db, "games"),
     rounds: buildModel(db, "rounds")
   };
   models.players.getByEvent = function(eventId) {
     return db("players")
+      .distinct("players.*")
       .join("round_players", "players.id", "=", "round_players.player_id")
       .join("rounds", "round_players.round_id", "=", "rounds.id")
+      .where("rounds.event_id", eventId);
+  };
+  models.players.getByRound = function(roundId) {
+    return db("players")
+      .select("players.*", "round_players.score")
+      .join("round_players", "players.id", "=", "round_players.player_id")
+      .where("round_players.round_id", roundId)
+      .orderBy("round_players.score", "DESC");
+  };
+  models.rounds.getByPlayer = function(playerId) {
+    return db("rounds")
+      .select("rounds.*", "round_players.score")
+      .join("round_players", "rounds.id", "=", "round_players.round_id")
+      .where("round_players.player_id", playerId)
+      .orderBy("id", "DESC");
+  };
+  models.games.getByEvent = function(eventId) {
+    return db("games")
+      .distinct("games.*")
+      .join("rounds", "rounds.game_id", "=", "games.id")
       .where("rounds.event_id", eventId);
   };
   models.rounds.createAndGet = async function(input) {

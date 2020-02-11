@@ -1,19 +1,18 @@
 {
   "name": "games-night",
   "version": "0.0.0",
-  "main": "server/index.js",
-  "license": "MIT",
   "scripts": {
-    "hack": "vue-cli-service build --watch ./src/index.js",
-    "build": "vue-cli-service build ./src/index.js",
-    "test:vue": "vue-cli-service test:unit ./src/tests/*",
     "serve": "nodemon ./server/index.js",
-    "start": "yarn build && node ./server/index.js",
-    "test:server": "yarn seed && mocha ./server/tests/*",
+    "build": "vue-cli-service build ./src/index.js",
+    "hack": "vue-cli-service build --watch ./src/index.js",
     "migrate": "knex migrate:latest --knexfile knexfile.js",
     "rollback": "knex migrate:rollback --knexfile knexfile.js",
-    "seed": "knex seed:run --knexfile knexfile.js"
+    "seed": "knex seed:run --knexfile knexfile.js",
+    "start": "yarn build && node ./server/index.js",
+    "test:server": "yarn seed && mocha ./server/tests/*",
+    "test:vue": "vue-cli-service test:unit ./src/tests/*"
   },
+  "main": "server/index.js",
   "dependencies": {
     "@vue/cli": "^4.2.2",
     "@vue/cli-service": "^4.2.2",
@@ -25,11 +24,20 @@
     "express": "^4.17.1",
     "graphql": "^14.6.0",
     "knex": "^0.20.9",
+    "material-design-icons-iconfont": "^5.0.1",
     "mocha": "^7.0.1",
+    "moment": "^2.24.0",
     "nodemon": "^2.0.2",
     "pg": "^7.18.1",
     "vue": "^2.6.11",
     "vuetify": "^2.2.11",
     "vuex": "^3.1.2"
-  }
+  },
+  "devDependencies": {
+    "sass": "^1.19.0",
+    "sass-loader": "^8.0.0",
+    "vue-cli-plugin-vuetify": "^2.0.4",
+    "vuetify-loader": "^1.3.0"
+  },
+  "license": "MIT"
 }
