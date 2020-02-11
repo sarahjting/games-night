@@ -81,6 +81,7 @@ export default {
   },
   methods: {
     createRound() {
+      if (!this.formRound.name) return;
       const $store = this.$store;
       const newRound = {
         eventId: this.event.id,
@@ -92,7 +93,6 @@ export default {
         newRound.players.push(i.name);
         newRound.playerScores.push(Number(i.score) ? Number(i.score) : 0);
       }
-      console.log("RoundForm.vue:createRound", newRound);
       $store.dispatch("createRound", [this.event, newRound]);
       this.formRound = { game: "", players: [] };
     },

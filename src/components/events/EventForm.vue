@@ -37,6 +37,7 @@ export default {
   }),
   methods: {
     createEvent() {
+      if (!this.formEvent.name) return;
       const $store = this.$store;
       $store.dispatch("createEvent", this.formEvent);
       this.formEvent = { name: "" };

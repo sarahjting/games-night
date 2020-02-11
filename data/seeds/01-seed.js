@@ -8,9 +8,10 @@ exports.seed = async function(knex) {
   const players = [
     "Sarah Ting",
     "Jeffrey Ting",
-    "Roger Yii",
     "James Tan",
-    "Christopher Tan"
+    "Christopher Tan",
+    "Roger Yii",
+    "Patricia Yii"
   ];
   const iconDownloads = [];
   for (i in players) {
@@ -28,7 +29,7 @@ exports.seed = async function(knex) {
 
   // events
   const events = [];
-  const numEvents = 5;
+  const numEvents = 10;
   for (let i = 1; i <= numEvents; i++) {
     events.push({
       name: generateEventName(),
@@ -81,7 +82,17 @@ function generateEventName() {
     "Barbeque",
     "Saturday",
     "House Party",
-    "Games Night"
+    "Games Night",
+    "Dinner Party",
+    "Celebration",
+    "Lunch",
+    "Get Together",
+    "Bash",
+    "Reception",
+    "Tea Party",
+    "Potluck",
+    "Picnic",
+    "Brunch"
   ];
   return `${randomValue(people)}'s ${randomValue(event)}`;
 }
