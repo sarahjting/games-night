@@ -81,7 +81,7 @@ export default {
   },
   methods: {
     createRound() {
-      if (!this.formRound.name) return;
+      if (!this.formRound.game) return;
       const $store = this.$store;
       const newRound = {
         eventId: this.event.id,
