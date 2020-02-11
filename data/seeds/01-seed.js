@@ -11,7 +11,21 @@ exports.seed = async function(knex) {
     "James Tan",
     "Christopher Tan",
     "Roger Yii",
-    "Patricia Yii"
+    "Patricia Yii",
+    "Potato1",
+    "Potato2",
+    "Potato3",
+    "Potato4",
+    "Potato5",
+    "Potato6",
+    "Potato7",
+    "Potato8",
+    "Potato9",
+    "Potato10",
+    "Potato11",
+    "Potato12",
+    "Potato13",
+    "Potato14"
   ];
   const iconDownloads = [];
   for (i in players) {
