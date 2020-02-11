@@ -1,6 +1,6 @@
 <template>
   <v-expansion-panel hide-actions>
-    <v-expansion-panel-header color="grey lighten-4" dark>
+    <v-expansion-panel-header color="cyan darken-3" dark>
       <gn-event-summary-header :event="event" />
     </v-expansion-panel-header>
 

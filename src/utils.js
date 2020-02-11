@@ -15,7 +15,7 @@ export default {
       await query(
         `query($where:EventWhereInput){
           events(where:$where){
-            name createdAt 
+            id name createdAt 
             games {id name} 
             players {id name score}
             rounds {id createdAt game{id name} players{id name score}}
@@ -25,6 +25,22 @@ export default {
       )
     ).events;
   },
+  async loadGames(where = {}) {
+    return (
+      await query(
+        `query($where:GameWhereInput){games(where:$where){id name}}`,
+        where
+      )
+    ).games;
+  },
+  async loadPlayers(where = {}) {
+    return (
+      await query(
+        `query($where:PlayerWhereInput){players(where:$where){id name}}`,
+        where
+      )
+    ).players;
+  },
   async createEvent(input = {}) {
     const result = await query(
       `mutation($input:EventCreateInput!){
@@ -33,7 +49,5 @@ export default {
       { input }
     );
     return result.event;
-  },
-  loadGames(where = {}) {},
-  loadPlayers(where = {}) {}
+  }
 };
