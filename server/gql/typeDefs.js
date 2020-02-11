@@ -27,7 +27,6 @@ module.exports = gql`
     gameId: Int
     game: Game
     createdAt: String
-    winner: Player
     score: Int
   }
   input GameWhereInput {

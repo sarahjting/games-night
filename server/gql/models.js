@@ -72,12 +72,27 @@ module.exports = db => {
     await response.data.pipe(file);
     return playerId;
   };
-  models.players.getByEvent = function(eventId) {
-    return db("players")
-      .distinct("players.*")
-      .join("round_players", "players.id", "=", "round_players.player_id")
-      .join("rounds", "round_players.round_id", "=", "rounds.id")
-      .where("rounds.event_id", eventId);
+  models.players.getByEvent = async function(eventId) {
+    const data = await db.raw(
+      `SELECT DISTINCT players.*, COUNT(t2) AS score 
+        FROM players
+        LEFT JOIN (
+          SELECT player_id, t1.round_id FROM (
+            SELECT MAX(score), round_id 
+            FROM round_players, rounds 
+            WHERE rounds.event_id = ? AND round_players.round_id = rounds.id 
+            GROUP BY round_id
+            ) t1 
+          JOIN round_players ON t1.max = round_players.score AND t1.round_id = round_players.round_id
+        ) t2 ON t2.player_id = players.id
+        INNER JOIN round_players ON round_players.player_id = players.id
+        INNER JOIN rounds ON round_players.round_id = rounds.id
+        WHERE rounds.event_id = ?
+        GROUP BY (players.id)
+        ORDER BY score DESC`,
+      [eventId, eventId]
+    );
+    return data.rows;
   };
   models.players.getByRound = function(roundId) {
     return db("players")

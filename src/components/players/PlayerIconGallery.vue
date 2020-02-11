@@ -7,7 +7,7 @@
         color="cyan"
         :content="player.name"
         bottom
-        class="mr-1"
+        class="mr-1 mb-5"
         overlap
       >
         <v-badge

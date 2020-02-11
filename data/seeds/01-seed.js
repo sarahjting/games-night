@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require("fs");
 const games = require("../json/games").slice(0, 100);
 const currentDate = new Date();
-const dayLong = 7 * 24 * 60 * 60 * 1000;
+const dayLong = 24 * 60 * 60 * 1000;
 exports.seed = async function(knex) {
   // players
   const players = [
@@ -11,21 +11,7 @@ exports.seed = async function(knex) {
     "James Tan",
     "Christopher Tan",
     "Roger Yii",
-    "Patricia Yii",
-    "Potato1",
-    "Potato2",
-    "Potato3",
-    "Potato4",
-    "Potato5",
-    "Potato6",
-    "Potato7",
-    "Potato8",
-    "Potato9",
-    "Potato10",
-    "Potato11",
-    "Potato12",
-    "Potato13",
-    "Potato14"
+    "Patricia Yii"
   ];
   const iconDownloads = [];
   for (i in players) {
@@ -43,7 +29,7 @@ exports.seed = async function(knex) {
 
   // events
   const events = [];
-  const numEvents = 10;
+  const numEvents = 50;
   for (let i = 1; i <= numEvents; i++) {
     events.push({
       name: generateEventName(),
@@ -57,7 +43,7 @@ exports.seed = async function(knex) {
   const eventRounds = [];
   const eventRoundPlayers = [];
   for (const i in events) {
-    const numRounds = Math.ceil(Math.random() * 10);
+    const numRounds = Math.ceil(Math.random() * 5);
     for (let j = 0; j < numRounds; j++) {
       eventRounds.push({
         event_id: Number(i) + 1,

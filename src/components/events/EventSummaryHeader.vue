@@ -9,7 +9,7 @@
 
     <v-col
       cols="12"
-      class="hidden-md-and-up pb-0 pt-5"
+      class="hidden-lg-and-up pb-0 pt-5"
       v-if="event.games.length"
     >
       <v-divider />
