@@ -60,6 +60,7 @@ yarn test:server
   - dotenv for loading environment variables
   - moment.js for formatting dates
   - nodemon for serving the backend
+  - FontAwesome for icons (and logo)
 
 # Authors
 
