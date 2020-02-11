@@ -9,10 +9,6 @@ module.exports = (models, db) => ({
     players: round => models.players.getByRound(round.id),
     game: round => models.games.first({ id: round.gameId })
   },
-  // RoundPlayer: {
-  //   player: roundPlayer => models.players.first({ id: roundPlayer.playerId }),
-  //   round: roundPlayer => models.rounds.first({ id: roundPlayer.roundId })
-  // },
   Game: {
     rounds: game => models.rounds.get({ gameId: game.id })
   },
