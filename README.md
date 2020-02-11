@@ -16,6 +16,8 @@ This was created during my time as a student at Code Chrysalis!
 
 Ever ran into this scenario? Not anymore! This app keeps track of your games nights and your scoreboards, so your losers have no more excuses for forgetting to bring drinks in the next week.
 
+Live demo can be found on Heroku: https://afternoon-sands-41925.herokuapp.com/
+
 # Installation
 
 1. Install dependencies using yarn.
