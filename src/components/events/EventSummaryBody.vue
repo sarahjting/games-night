@@ -5,7 +5,7 @@
       top
       right
       x-large
-      color="cyan"
+      color="amber"
       class="white--text add-round-button"
       @click="creatingRound = true"
       v-if="!creatingRound"

@@ -1,6 +1,6 @@
 <template>
   <v-expansion-panel :value="true">
-    <v-expansion-panel-header color="cyan" class="white--text">
+    <v-expansion-panel-header color="amber" class="white--text">
       <strong>
         <v-icon class="mr-2 white--text">fa-plus</v-icon>
         Add Event
