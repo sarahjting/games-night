@@ -16,6 +16,9 @@ export default new Vuex.Store({
     setEvents(state, events) {
       state.events = events;
     },
+    addEvent(state, event) {
+      state.events = [event, ...state.events];
+    },
     setGames(state, games) {
       state.games = games;
     },
@@ -24,6 +27,9 @@ export default new Vuex.Store({
     },
     setDrawer(state, value) {
       state.drawer = value;
+    },
+    addRoundToEvent(state, [event, round]) {
+      event.rounds.push(round);
     },
     toggleDrawer(state) {
       state.drawer = !state.drawer;
@@ -40,7 +46,13 @@ export default new Vuex.Store({
       context.commit("setPlayers", await utils.loadPlayers());
     },
     async createEvent(context, args) {
-      context.commit("setEvents", await utils.createEvent(args));
+      context.commit("addEvent", await utils.createEvent(args));
+    },
+    async createRound(context, args) {
+      context.commit("addRoundToEvent", [
+        args[0],
+        await utils.createRound(args[1])
+      ]);
     },
     async load(context) {
       await Promise.all([

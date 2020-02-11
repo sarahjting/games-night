@@ -9,18 +9,18 @@ async function query(query, variables) {
   ).data.data;
 }
 
+const eventSelector = `
+  id name createdAt 
+  games {id name} 
+  players {id name score}
+  rounds {id createdAt game{id name} players{id name score}}
+`;
+
 export default {
   async loadEvents(where = {}) {
     return (
       await query(
-        `query($where:EventWhereInput){
-          events(where:$where){
-            id name createdAt 
-            games {id name} 
-            players {id name score}
-            rounds {id createdAt game{id name} players{id name score}}
-          }
-        }`,
+        `query($where:EventWhereInput){events(where:$where){${eventSelector}}}`,
         where
       )
     ).events;
@@ -43,11 +43,20 @@ export default {
   },
   async createEvent(input = {}) {
     const result = await query(
-      `mutation($input:EventCreateInput!){
-        createEvent(input:$input) { name }
+      `mutation($input:EventCreateInput!){createEvent(input:$input) { ${eventSelector} }}`,
+      { input }
+    );
+    return result.createEvent;
+  },
+  async createRound(input = {}) {
+    const result = await query(
+      `mutation($input:RoundCreateInput!){
+        createRound(input:$input) { 
+          id createdAt game{id name} players{id name score}
+        }
       }`,
       { input }
     );
-    return result.event;
+    return result.createRound;
   }
 };

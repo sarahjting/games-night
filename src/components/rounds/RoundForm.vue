@@ -5,7 +5,12 @@
         <v-row>
           <v-col cols="12" md="6" lg="4" justify="center">
             <v-container class="fill-height" fluid>
-              <v-autocomplete outlined label="Game" :items="games" />
+              <v-combobox
+                outlined
+                label="Game"
+                :items="games"
+                v-model="formRound.game"
+              />
             </v-container>
           </v-col>
           <v-col cols="12" class="hidden-md-and-up py-0">
@@ -14,13 +19,18 @@
           <v-col cols="12" md="6" lg="6" class="py-0">
             <v-container class="fill-height" fluid>
               <gn-round-form-player
-                :players="players"
-                :player="{ name: '', score: '' }"
-              />
-              <gn-round-form-player
                 v-for="(player, j) in formRound.players"
                 :key="j"
                 :players="players"
+                :player="player"
+              />
+              <gn-round-form-player
+                :players="players"
+                :player="formPlayer"
+                @changed="
+                  (value, callback) =>
+                    updatePlayer(formRound.players.length, value, callback)
+                "
               />
             </v-container>
           </v-col>
@@ -53,9 +63,12 @@ import ReadableDate from "../widgets/ReadableDate";
 import RoundFormPlayer from "./RoundFormPlayer";
 
 export default {
-  props: ["round"],
+  props: ["round", "event"],
   data: () => ({
-    formRound: {},
+    formRound: {
+      game: "",
+      players: []
+    },
     formPlayer: {},
     players: [],
     games: []
@@ -67,12 +80,36 @@ export default {
     "gn-round-form-player": RoundFormPlayer
   },
   methods: {
-    createEvent() {
+    createRound() {
       const $store = this.$store;
-      $store.dispatch("createEvent", this.formEvent).then(function() {
-        $store.dispatch("loadEvents");
+      const newRound = {
+        eventId: this.event.id,
+        game: this.formRound.game,
+        players: [],
+        playerScores: []
+      };
+      for (let i of this.formRound.players) {
+        newRound.players.push(i.name);
+        newRound.playerScores.push(Number(i.score) ? Number(i.score) : 0);
+      }
+      console.log("RoundForm.vue:createRound", newRound);
+      $store.dispatch("createRound", [this.event, newRound]);
+      this.formRound = { game: "", players: [] };
+    },
+    updatePlayer(i, player, callback) {
+      if (i >= this.formRound.players.length) {
+        if (player.name) {
+          this.formRound.players.push(player);
+          callback();
+        }
+      } else if (player.name) {
+        this.formRound.players[i] = player;
+      }
+      const names = {};
+      this.formRound.players = this.formRound.players.filter(x => {
+        if (!x.name || names[x.name]) return false;
+        return (names[x.name] = true);
       });
-      this.formEvent = { name: "" };
     }
   },
   created() {

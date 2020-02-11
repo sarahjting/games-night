@@ -13,7 +13,7 @@
       <v-icon class="white--text mr-2">fa-plus</v-icon>
       Add Round
     </v-btn>
-    <gn-round-form v-if="creatingRound" :round="{}" />
+    <gn-round-form v-if="creatingRound" :round="{}" :event="event" />
     <gn-round-detail
       v-for="(round, i) in event.rounds"
       v-bind:key="i"

@@ -1,3 +1,6 @@
+const axios = require("axios");
+const fs = require("fs");
+
 buildModel = (db, tableName) => ({
   get: async function(where = {}, orderBy = {}, joins = []) {
     const query = db(tableName);
@@ -58,6 +61,17 @@ module.exports = db => {
     games: buildModel(db, "games"),
     rounds: buildModel(db, "rounds")
   };
+  models.players.createAndAvatar = async function(input) {
+    const playerId = await models.players.create(input);
+    const file = fs.createWriteStream(`./dist/img/players/${playerId}.jpg`);
+    const response = await axios({
+      url: "https://picsum.photos/200",
+      method: "GET",
+      responseType: "stream"
+    });
+    await response.data.pipe(file);
+    return playerId;
+  };
   models.players.getByEvent = function(eventId) {
     return db("players")
       .distinct("players.*")
@@ -91,7 +105,9 @@ module.exports = db => {
     const players = [];
     for (let i of input.players) {
       const p = await models.players.first({ name: i });
-      players.push(p ? p.id : await models.players.create({ name: i }));
+      players.push(
+        p ? p.id : await models.players.createAndAvatar({ name: i })
+      );
     }
     const roundId = await this.create({
       eventId: input.eventId,

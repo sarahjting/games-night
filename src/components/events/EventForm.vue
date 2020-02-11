@@ -38,9 +38,7 @@ export default {
   methods: {
     createEvent() {
       const $store = this.$store;
-      $store.dispatch("createEvent", this.formEvent).then(function() {
-        $store.dispatch("loadEvents");
-      });
+      $store.dispatch("createEvent", this.formEvent);
       this.formEvent = { name: "" };
     }
   },
