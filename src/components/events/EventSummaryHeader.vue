@@ -2,7 +2,7 @@
   <v-row align="center" class="spacer" no-gutters>
     <v-col cols="12" sm="12" md="12" lg="2" class="py-10">
       <strong v-html="event.name" class="white--text"></strong>
-      <div class="mt-1 cyan--text">
+      <div class="mt-1 cyan--text text--lighten-2">
         <gn-readable-date :date="event.createdAt" />
       </div>
     </v-col>
