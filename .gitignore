@@ -3,5 +3,5 @@
 node_modules
 dist
 
-public/img/players/*
+public/img/players/*.jpg
 *.log
