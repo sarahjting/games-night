@@ -1,6 +1,6 @@
 const axios = require("axios");
 const fs = require("fs");
-const games = require("../json/games").slice(0, 40);
+const games = require("../json/games").slice(0, 20);
 const currentDate = new Date();
 const dayLong = 24 * 60 * 60 * 1000;
 exports.seed = async function(knex) {
