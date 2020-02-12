@@ -64,7 +64,7 @@ module.exports = db => {
     games: {
       get: async function(where) {
         let data = db("games").orderBy("name", "ASC");
-        if (Object.keys(where).length) data = data.where(where);
+        if (where && Object.keys(where).length) data = data.where(where);
         data = await data;
         return data.map(objectToCamel);
       },
