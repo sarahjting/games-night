@@ -26,9 +26,7 @@ server.applyMiddleware({ app, path: "/api" });
 app.get(/(.*)/, (req, res) => {
   const uri = req.params[0] === "/" ? "/index.html" : req.params[0];
   res.sendFile(path.join(getPublicPath(uri)), err => {
-    if (!err) {
-      console.log(`200 🐑 ${uri}:`);
-    } else {
+    if (err) {
       console.log(`${err.status} 🐐 ${uri}: ${err.message}`);
     }
   });

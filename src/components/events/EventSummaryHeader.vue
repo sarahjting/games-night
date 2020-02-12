@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" class="spacer" no-gutters>
-    <v-col cols="12" sm="12" md="12" lg="2" class="py-10">
+    <v-col cols="12" sm="12" md="12" lg="2" class="py-5">
       <strong v-html="event.name" class="white--text"></strong>
       <div class="mt-1 cyan--text text--lighten-2">
         <gn-readable-date :date="event.createdAt" />

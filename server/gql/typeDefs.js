@@ -30,12 +30,14 @@ module.exports = gql`
     score: Int
   }
   input GameWhereInput {
+    id: Int
     name: String
   }
   input GameCreateInput {
     name: String!
   }
   input PlayerWhereInput {
+    id: Int
     name: String
   }
   input PlayerCreateInput {
@@ -43,6 +45,7 @@ module.exports = gql`
   }
   input EventWhereInput {
     id: Int
+    name: String
   }
   input EventCreateInput {
     name: String!

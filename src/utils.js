@@ -33,6 +33,17 @@ export default {
       )
     ).games;
   },
+  async loadGameDetails(id) {
+    return (
+      await query(
+        `query($where:GameWhereInput){games(where:$where){
+          id name
+          rounds { event{name} createdAt players{id name score} }
+        }}`,
+        { where: { id } }
+      )
+    ).games[0];
+  },
   async loadPlayers(where = {}) {
     return (
       await query(
