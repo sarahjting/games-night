@@ -65,10 +65,8 @@ export default {
     async loadGameHistory() {
       if (this.cardRound.rounds) return;
       this.cardRound.rounds = true;
-
       const gameDetails = await utils.loadGameDetails(this.cardRound.game.id);
       this.cardRound.rounds = gameDetails.rounds;
-      console.log(JSON.parse(JSON.stringify(this.cardRound)));
     }
   },
   created() {

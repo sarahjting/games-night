@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style>
-body {
-  background-color: #795548;
+#inspire {
+  background-color: #4e342e;
 }
 </style>

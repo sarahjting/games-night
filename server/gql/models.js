@@ -2,99 +2,179 @@ const axios = require("axios");
 const fs = require("fs");
 const DataLoader = require("dataloader");
 
-/** DATALOADER **/
-const loaders = {};
-const loaderCache = {};
-
 module.exports = db => {
-  /* DATALOADER */
-  ["rounds", "events", "games", "players"].forEach(async tableName => {
-    loaderCache[tableName] = {};
-    const data = await db(tableName);
-    data.forEach(x => (loaderCache[tableName][x.id] = x));
-    loaders[tableName] = new DataLoader(ids =>
-      ids.map(id => loaderCache[tableName][id])
-    );
-  });
-
   /* MODELS */
   const models = {
-    players: buildModel(db, "players"),
-    events: buildModel(db, "events"),
-    games: buildModel(db, "games"),
-    rounds: buildModel(db, "rounds")
+    players: {
+      get: async function() {
+        return await db("players").orderBy("id", "DESC");
+      },
+      first: new DataLoader(async ids => {
+        let data = await db("players").whereIn("id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.find(x => x.id === id));
+      }),
+      getByEvent: new DataLoader(async ids => {
+        const data = await db.raw(
+          `SELECT DISTINCT players.*, rounds.event_id, COUNT(t2) AS score 
+            FROM players
+            LEFT JOIN (
+              SELECT player_id, t1.round_id FROM (
+                  SELECT MAX(score), round_id 
+                  FROM round_players, rounds 
+                  WHERE rounds.event_id IN (??) AND round_players.round_id = rounds.id 
+                  GROUP BY round_id
+                ) t1 
+              JOIN round_players ON t1.max = round_players.score AND t1.round_id = round_players.round_id
+            ) t2 ON t2.player_id = players.id
+            INNER JOIN round_players ON round_players.player_id = players.id
+            INNER JOIN rounds ON round_players.round_id = rounds.id
+            WHERE rounds.event_id IN (??)
+            GROUP BY (players.id, rounds.event_id)
+            ORDER BY score DESC`,
+          [ids, ids]
+        );
+        data.rows = data.rows.map(objectToCamel);
+        return ids.map(id => data.rows.filter(x => x.eventId == id));
+      }),
+      getByRound: new DataLoader(async ids => {
+        let data = await db("players")
+          .select("players.*", "round_players.round_id", "round_players.score")
+          .join("round_players", "round_players.player_id", "=", "players.id")
+          .whereIn("round_players.round_id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.roundId === id));
+      })
+    },
+
+    /** EVENTS MODEL **/
+    events: {
+      get: async function() {
+        let data = await db("events").orderBy("id", "DESC");
+        return data.map(objectToCamel);
+      },
+      first: new DataLoader(async ids => {
+        let data = await db("events").whereIn("id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.find(x => x.id === id));
+      })
+    },
+
+    /** GAMES MODEL **/
+    games: {
+      get: async function(where) {
+        let data = db("games").orderBy("name", "ASC");
+        if (Object.keys(where).length) data = data.where(where);
+        data = await data;
+        return data.map(objectToCamel);
+      },
+      first: new DataLoader(async ids => {
+        let data = await db("games").whereIn("id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.find(x => x.id === id));
+      }),
+      getByEvent: new DataLoader(async ids => {
+        let data = await db("games")
+          .select("games.*", "rounds.event_id")
+          .join("rounds", "rounds.game_id", "=", "games.id")
+          .whereIn("rounds.event_id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.eventId === id));
+      }),
+      getByGame: new DataLoader(async ids => {
+        let data = await db("rounds").whereIn("rounds.game_id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.gameId === id));
+      }),
+      getByPlayer: new DataLoader(async ids => {
+        let data = await db("rounds")
+          .select("rounds.*", "round_players.player_id", "round_players.score")
+          .join("round_players", "round_players.round_id", "=", "rounds.id")
+          .whereIn("round_players.player_id", ids)
+          .orderBy("id", "DESC");
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.playerId === id));
+      })
+    },
+
+    /** ROUNDS MODEL **/
+    rounds: {
+      first: new DataLoader(async ids => {
+        let data = await db("rounds").whereIn("rounds.id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.find(x => x.id === id));
+      }),
+      getByEvent: new DataLoader(async ids => {
+        let data = await db("rounds").whereIn("rounds.event_id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.eventId === id));
+      }),
+      getByGame: new DataLoader(async ids => {
+        let data = await db("rounds").whereIn("rounds.game_id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.gameId === id));
+      }),
+      getByPlayer: new DataLoader(async ids => {
+        let data = await db("rounds")
+          .select("rounds.*", "round_players.player_id", "round_players.score")
+          .join("round_players", "round_players.round_id", "=", "rounds.id")
+          .whereIn("round_players.player_id", ids);
+        data = data.map(objectToCamel);
+        return ids.map(id => data.filter(x => x.playerId === id));
+      })
+    }
+  };
+
+  /** MUTATIONS **/
+  models.players.create = async function(input) {
+    const insert = objectToSnake(input);
+    const result = await db("players")
+      .insert(insert)
+      .returning("id");
+    return models.players.first.load(result[0]);
   };
   models.players.createAndAvatar = async function(input) {
-    const playerId = await models.players.create(input);
-    const file = fs.createWriteStream(`./dist/img/players/${playerId}.jpg`);
+    const player = await models.players.create(input);
+    const file = fs.createWriteStream(`./dist/img/players/${player.id}.jpg`);
     const response = await axios({
       url: "https://picsum.photos/200",
       method: "GET",
       responseType: "stream"
     });
     await response.data.pipe(file);
-    return playerId;
+    return player;
   };
-  models.players.getByEvent = async function(eventId) {
-    console.log(`SELECT FROM players (${++queries})`);
-    const data = await db.raw(
-      `SELECT DISTINCT players.*, COUNT(t2) AS score 
-        FROM players
-        LEFT JOIN (
-          SELECT player_id, t1.round_id FROM (
-            SELECT MAX(score), round_id 
-            FROM round_players, rounds 
-            WHERE rounds.event_id = ? AND round_players.round_id = rounds.id 
-            GROUP BY round_id
-            ) t1 
-          JOIN round_players ON t1.max = round_players.score AND t1.round_id = round_players.round_id
-        ) t2 ON t2.player_id = players.id
-        INNER JOIN round_players ON round_players.player_id = players.id
-        INNER JOIN rounds ON round_players.round_id = rounds.id
-        WHERE rounds.event_id = ?
-        GROUP BY (players.id)
-        ORDER BY score DESC`,
-      [eventId, eventId]
-    );
-    return data.rows;
+  models.games.create = async function(input) {
+    const insert = objectToSnake(input);
+    const result = await db("games")
+      .insert(insert)
+      .returning("id");
+    return models.games.first.load(result[0]);
   };
-  models.players.getByRound = function(roundId) {
-    console.log(`SELECT FROM players (${++queries})`);
-    return db("players")
-      .select("players.*", "round_players.score")
-      .join("round_players", "players.id", "=", "round_players.player_id")
-      .where("round_players.round_id", roundId)
-      .orderBy("round_players.score", "DESC");
+  models.events.create = async function(input) {
+    const insert = objectToSnake(input);
+    const result = await db("events")
+      .insert(insert)
+      .returning("id");
+    return models.events.first.load(result[0]);
   };
-  models.rounds.getByPlayer = function(playerId) {
-    console.log(`SELECT FROM rounds (${++queries})`);
-    return db("rounds")
-      .select("rounds.*", "round_players.score")
-      .join("round_players", "rounds.id", "=", "round_players.round_id")
-      .where("round_players.player_id", playerId)
-      .orderBy("id", "DESC");
-  };
-  models.games.getByEvent = function(eventId) {
-    console.log(`SELECT FROM games (${++queries})`);
-    return db("games")
-      .distinct("games.*")
-      .join("rounds", "rounds.game_id", "=", "games.id")
-      .where("rounds.event_id", eventId);
-  };
-  models.rounds.createAndGet = async function(input) {
-    let game = await models.games.first({ name: input.game });
-    game = game ? game.id : await models.games.create({ name: input.game });
+  models.rounds.create = async function(input) {
+    let game = await db("games").where("name", input.game);
+    if (game.length) game = game[0];
+    else game = await models.games.create({ name: input.game });
     const players = [];
     for (let i of input.players) {
-      const p = await models.players.first({ name: i });
-      players.push(
-        p ? p.id : await models.players.createAndAvatar({ name: i })
-      );
+      let p = await db("players").where("name", i);
+      if (p.length) p = p[0];
+      else p = await models.players.createAndAvatar({ name: i });
+      players.push(p.id);
     }
-    const roundId = await this.create({
-      eventId: input.eventId,
-      gameId: game
-    });
+
+    const roundId = (
+      await db("rounds")
+        .insert({ event_id: input.eventId, game_id: game.id })
+        .returning("id")
+    )[0];
 
     for (let i in players) {
       await db("round_players").insert({
@@ -103,57 +183,25 @@ module.exports = db => {
         score: input.playerScores[i]
       });
     }
-    return this.first({ id: roundId });
+    return this.first.load(roundId);
   };
   return models;
 };
 
 /** UTILITY **/
 let queries = 0;
-buildModel = (db, tableName) => ({
-  getById: async function(id) {
-    const result = await loadById[tableName].load(id);
-    console.log(`GETBYID ${id}: ${result}`);
-    return result;
-  },
-  get: async function(where = {}, orderBy = {}, joins = []) {
-    console.log(`SELECT FROM ${tableName} (${++queries})`);
-    const query = db(tableName);
-    for (const i of Object.keys(where)) {
-      query.where(camelToSnake(i), where[i]);
-    }
-    for (const i of Object.keys(orderBy)) {
-      query.orderBy(camelToSnake(i), orderBy[i]);
-    }
-    for (const i of joins) {
-      query.join(i[0], i[1], "=", i[2]);
-    }
 
-    const raw = await query;
-    const r1 = [];
-    for (const i of raw) {
-      const r2 = {};
-      for (const j in i) r2[snakeToCamel(j)] = i[j];
-      r1.push(r2);
-    }
-    return r1;
-  },
-  first: async function(where, orderBy) {
-    return (await this.get(where, orderBy)).pop();
-  },
-  create: async function(input) {
-    const insert = {};
-    for (const i of Object.keys(input)) insert[camelToSnake(i)] = input[i];
-    return (
-      await db(tableName)
-        .insert(insert)
-        .returning("id")
-    )[0];
-  },
-  createAndGet: async function(input) {
-    return this.first({ id: await this.create(input) });
-  }
-});
+function objectToSnake(obj) {
+  const insert = {};
+  for (const i of Object.keys(obj)) insert[camelToSnake(i)] = obj[i];
+  return insert;
+}
+
+function objectToCamel(obj) {
+  const insert = {};
+  for (const i of Object.keys(obj)) insert[snakeToCamel(i)] = obj[i];
+  return insert;
+}
 
 // https://vladimir-ivanov.net/camelcase-to-snake_case-and-vice-versa-with-javascript/
 function camelToSnake(string) {
