@@ -57,6 +57,7 @@ yarn test:server
   - Vue components framework
   - Vuex state management
   - Vuetify UI framework
+  - ChartJS & vue-chartjs for line charts
 - Utilities
   - Axios for fetching data from the back-end API, and for downloading random profile images
   - dotenv for loading environment variables
