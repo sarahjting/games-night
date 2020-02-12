@@ -5,6 +5,16 @@ export default {
   extends: Line,
   props: ["game", "rounds"],
   mounted() {
+    const colors = [
+      "#FF0066",
+      "#00FBFF",
+      "#FFCC00",
+      "#0088FF",
+      "#AEFF00",
+      "#000000"
+    ];
+    let colorIndex = 0;
+
     // get labels
     const rawLabels = {};
     this.rounds.forEach(x => (rawLabels[x.createdAt] = 1));
@@ -78,15 +88,4 @@ export default {
     );
   }
 };
-
-//https://stackoverflow.com/questions/1484506/random-color-generator
-const colors = [
-  "#FF0066",
-  "#00FBFF",
-  "#FFCC00",
-  "#0088FF",
-  "#AEFF00",
-  "#000000"
-];
-let colorIndex = 0;
 </script>
