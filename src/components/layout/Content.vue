@@ -1,6 +1,6 @@
 <template>
   <v-content>
-    <v-container fluid class="py-5 px-10 brown darken-3">
+    <v-container fluid class="py-md-5 px-md-10 brown darken-3">
       <v-row justify="center">
         <v-expansion-panels popout>
           <gn-event-form :event="{}" />
